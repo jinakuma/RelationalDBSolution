@@ -1,33 +1,42 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.IO;
-using Microsoft.Extensions.Configuration;
 using DataAccessLibrary;
 using DataAccessLibrary.Models;
 
-namespace SQLServerUI
+namespace SqliteUI
 {
     class Program
     {
         static void Main(string[] args)
         {
-            SqlCrudOperations sql = new SqlCrudOperations(GetConnectionString());
+            SQLiteCrud sql = new SQLiteCrud(GetConnectionString());
             
+
             //ReadAllContacts(sql);
 
-            //ReadContact(sql,1);
-            
+            //ReadContact(sql,2);
+
             //CreateNewContact(sql);
 
             //UpdateContact(sql);
 
-            RemovePhoneNumberFromContact(sql,1,1);
+            //RemovePhoneNumberFromContact(sql, 1, 1);
 
-            Console.WriteLine("Done Processing SQL");
-
+            Console.WriteLine("Done Processing Sqlite");
             Console.ReadLine();
         }
+        private static string GetConnectionString(string connectionStringName = "Default")
+        {
 
-        private static void CreateNewContact(SqlCrudOperations sql)
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+            var config = builder.Build();
+
+            return config.GetConnectionString(connectionStringName);
+        }
+        private static void CreateNewContact(SQLiteCrud sql)
         {
             FullContactModel user = new FullContactModel
             {
@@ -45,7 +54,7 @@ namespace SQLServerUI
             sql.CreateContact(user);
         }
 
-        private static void ReadAllContacts(SqlCrudOperations sql)
+        private static void ReadAllContacts(SQLiteCrud sql)
         {
             var rows = sql.GetAllContacts();
             foreach (var row in rows)
@@ -54,38 +63,28 @@ namespace SQLServerUI
             }
         }
 
-        private static void UpdateContact(SqlCrudOperations sql)
+        private static void UpdateContact(SQLiteCrud sql)
         {
             BasicContactModel contact = new BasicContactModel
             {
-                Id =1,
+                Id = 1,
                 FirstName = "Murti",
                 LastName = "Utlu"
             };
             sql.UpdateContactName(contact);
 
         }
-        private static string GetConnectionString(string connectionStringName = "Default")
-        {
-            
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            var config = builder.Build();
-            
-            return config.GetConnectionString(connectionStringName);
-        }
-        private static void ReadContact(SqlCrudOperations sql, int contactId)
+        private static void ReadContact(SQLiteCrud sql, int contactId)
         {
             var contact = sql.GetFullContactById(contactId);
-            
-                Console.WriteLine($"{contact.BasicInfo.Id} : {contact.BasicInfo.FirstName} {contact.BasicInfo.LastName}");
-            
+
+            Console.WriteLine($"{contact.BasicInfo.Id} : {contact.BasicInfo.FirstName} {contact.BasicInfo.LastName}");
+
         }
 
-        private static void RemovePhoneNumberFromContact(SqlCrudOperations sql, int contactId, int phoneNumberId)
+        private static void RemovePhoneNumberFromContact(SQLiteCrud sql, int contactId, int phoneNumberId)
         {
-            sql.RemovePhoneNumberFromContact(contactId,phoneNumberId);
+            sql.RemovePhoneNumberFromContact(contactId, phoneNumberId);
         }
     }
 }
